@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Customizable Table</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="./lib/custom-table.css" />
+</head>
+<body>
+  <div class="app">
+    <h1>Customizable Table</h1>
+    <div class="controls">
+      <button id="exportBtn" type="button">Export JSON</button>
+      <label class="import-label">
+        <input id="importInput" type="file" accept="application/json" hidden />
+        <span class="button-like">Import JSON</span>
+      </label>
+    </div>
+    <div id="tableContainer"></div>
+  </div>
+  <script type="module" src="demo.js"></script>
+</body>
+</html>

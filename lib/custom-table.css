@@ -1,0 +1,260 @@
+/* Styles scoped under .ctable to avoid global collisions (Light theme) */
+
+.ctable * {
+    box-sizing: border-box;
+}
+
+.ctable .table-wrap {
+    overflow-x: auto;
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.ctable table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: max-content;
+    min-width: 240px;
+}
+
+.ctable th,
+.ctable td {
+    border: 1px solid #e5e7eb;
+    padding: 6px 8px;
+    min-width: 90px;
+    background: #ffffff;
+    color: #111827;
+    vertical-align: top;
+}
+
+.ctable th {
+    position: relative;
+}
+
+.ctable td:focus,
+.ctable th:focus {
+    outline: 2px solid #93c5fd;
+    outline-offset: -2px;
+}
+
+.ctable .add-col,
+.ctable .add-row {
+    background: #f9fafb;
+    color: #2563eb;
+    border-style: dashed;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.ctable .add-col:hover,
+.ctable .add-row:hover {
+    background: #f3f4f6;
+    color: #1d4ed8;
+}
+
+.ctable .add-col {
+    min-width: 110px;
+    vertical-align: middle;
+    width: auto;
+}
+
+.ctable .add-row {
+    height: 36px;
+}
+
+.ctable .cell {
+    min-height: 26px;
+}
+
+.ctable .placeholder {
+    color: #9ca3af;
+}
+
+.ctable caption {
+    caption-side: bottom;
+    padding-top: 8px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.ctable .corner-head {
+    background: #f3f4f6;
+    min-width: 60px;
+}
+
+.ctable .row-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.ctable .col-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.ctable .btn {
+    background: #f3f4f6;
+    color: #111827;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    line-height: 1.6;
+    cursor: pointer;
+}
+
+.ctable .btn:hover {
+    background: #e5e7eb;
+}
+
+.ctable .btn.danger {
+    background: #fee2e2;
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
+.ctable .btn.danger:hover {
+    background: #fecaca;
+}
+
+.ctable .btn.secondary {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #1f2937;
+}
+
+.ctable .btn.secondary:hover {
+    background: #f3f4f6;
+}
+
+.ctable .btn.active {
+    outline: 1px solid #93c5fd;
+}
+
+/* Style editor panel */
+.ct-style-panel {
+    position: absolute;
+    z-index: 30;
+    min-width: 280px;
+    max-width: 340px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 8px;
+}
+
+.ct-style-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 4px 8px;
+}
+
+.ct-style-title {
+    color: #111827;
+    font-weight: 600;
+}
+
+.ct-style-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 4px;
+}
+
+.ct-style-body label {
+    display: grid;
+    gap: 4px;
+    color: #374151;
+    font-size: 12px;
+}
+
+.ct-input {
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    padding: 6px 8px;
+    width: 100%;
+}
+
+.ct-style-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 4px 4px;
+}
+
+.ct-style-actions .spacer {
+    flex: 1;
+}
+
+/* Toolbar (Excel-like) */
+.ct-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    margin-bottom: 8px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.ct-tools {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ct-target {
+    color: #6b7280;
+    font-size: 12px;
+    padding-right: 8px;
+}
+
+.ct-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ct-color {
+    width: 110px;
+}
+
+.ct-width {
+    width: 90px;
+}
+
+.ct-group.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Selection highlight */
+.ctable tbody tr.is-row-selected>th,
+.ctable tbody tr.is-row-selected>td:not(.add-col) {
+    background: #eef2ff;
+}
+
+/* Column selection highlight */
+.ctable thead th.is-col-selected,
+.ctable tbody td.is-col-selected {
+    background: #fef3c7;
+}

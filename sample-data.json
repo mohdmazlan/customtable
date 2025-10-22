@@ -1,0 +1,9 @@
+{
+  "rows": 3,
+  "cols": 3,
+  "data": [
+    ["Name", "Age", "City"],
+    ["Alice", "30", "Seattle"],
+    ["Bob", "26", "Austin"]
+  ]
+}

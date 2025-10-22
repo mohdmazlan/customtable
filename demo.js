@@ -1,0 +1,37 @@
+import { CustomTable } from './lib/custom-table.js';
+
+const container = document.getElementById('tableContainer');
+const exportBtn = document.getElementById('exportBtn');
+const importInput = document.getElementById('importInput');
+
+const table = new CustomTable(container, { rows: 2, cols: 2 });
+
+exportBtn.addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(table.toJSON(), null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'table-data.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+importInput.addEventListener('change', async (e) => {
+  const file = e.target.files?.[0];
+  if(!file) return;
+  try {
+    const text = await file.text();
+    const json = JSON.parse(text);
+    table.fromJSON(json);
+  } catch(err){
+    alert('Invalid JSON file.');
+    console.error(err);
+  } finally {
+    importInput.value = '';
+  }
+});
+
+// Expose globally for quick console experiments (optional)
+window.ctable = table;
