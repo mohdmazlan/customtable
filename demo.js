@@ -7,11 +7,12 @@ const importInput = document.getElementById('importInput');
 const table = new CustomTable(container, { rows: 2, cols: 2 });
 
 exportBtn.addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(table.toJSON(), null, 2)], {type: 'application/json'});
+  // Export in spreadsheet-style JSON (commercial.json-like)
+  const blob = new Blob([JSON.stringify(table.toSpreadsheetJSON(), null, 2)], {type: 'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'table-data.json';
+  a.download = 'table-data-spreadsheet.json';
   document.body.appendChild(a);
   a.click();
   a.remove();

@@ -1,78 +1,176 @@
-# Customizable Table
+# Customizable Table (Developer Guide)
 
-A tiny, dependency-free JS library and demo that renders an editable table with:
-- Default 2×2 cells
-- "+ col" control at the end of each row and in header to add a column
-- "+ add row" control at the bottom to add a row
-- Remove column via the header “−” button above that column
-- Remove row via the “− row” button on the right of that row
-- Export current table as JSON
-- Import table from a JSON file
+Lightweight, dependency‑free, Vanilla JS table/spreadsheet component with column letters (A, B, C…), inline editing, per‑cell/row/column styling, and JSON import/export. The demo is a single static page—no build step required.
+
+## Features
+- Editable grid (contenteditable TDs)
+- Column headers: A, B, C… (Excel‑style)
+- Add/remove rows and columns
+- Style toolbar: text align, bold/italic, text/background color, column width
+- Per‑cell, per‑row, and per‑column inline styles with precedence: default → column → row → cell
+- Import: internal JSON format and spreadsheet‑style JSON, including inline and nested cell styles
+- Export: internal JSON format (round‑trip) and spreadsheet‑style JSON (commercial.json‑like) using consolidated keys
+- Merged cells: import, render (rowSpan/colSpan), and export
+- Selection restore on import (activeCell/selection)
+- Applying a style to a whole row/column now updates each individual cell’s style too
+
+## Project layout
+- `index.html` – demo page
+- `demo.js` – demo wiring (load/save)
+- `lib/custom-table.js` – main ES module (CustomTable class)
+- `lib/custom-table.css` – component styles
+- `styles.css` – demo styles
+- `sample-data.json` / `commercial.json` – example data
 
 ## Run locally
-Because this demo uses ES modules, you should serve the folder with a simple web server (opening the file directly may be blocked by the browser).
+Because this uses ES modules, serve with a simple web server.
 
 ### Simple server (PowerShell)
 ```powershell
-# Serve current directory on http://localhost:8000
+# Serve current directory at http://localhost:8000
 # Requires Python installed and on PATH
 python -m http.server 8000
 ```
-Then open http://localhost:8000 in your browser and click `index.html`.
+Open http://localhost:8000 and navigate to `index.html`.
 
-## JSON format
-```json
-{
-  "rows": 3,
-  "cols": 3,
-  "data": [
-    ["Name", "Age", "City"],
-    ["Alice", "30", "Seattle"],
-    ["Bob", "26", "Austin"]
-  ]
-}
-```
-Notes:
-- `rows` and `cols` describe the intended size; `data` will be normalized to a rectangular grid if needed.
-- Non-string values are stringified.
+## Using the component
 
-## Tips
-- Cells are contenteditable; click and type to edit.
-- Use the header "+ col" or any row's "+ col" to add a column to the end.
-- Use the bottom "+ add row" to append a new row.
-- Use the header “−” to remove a column, and the row’s “− row” to remove a row. The last row/column can’t be removed.
-- Use Export/Import to save and restore your table.
-
-## Use as a library (ES module)
-
-Include the CSS and import the class, then instantiate with a container element:
+Include CSS, create a container, and instantiate:
 
 ```html
 <link rel="stylesheet" href="./lib/custom-table.css" />
 <div id="table"></div>
 <script type="module">
   import { CustomTable } from './lib/custom-table.js';
-  const table = new CustomTable(document.getElementById('table'), { rows: 2, cols: 2 });
-  // Methods
+  const table = new CustomTable(document.getElementById('table'), { rows: 4, cols: 4 });
+
+  // Rows/Columns
   table.addRow();
   table.addColumn();
   table.removeRow(0);
   table.removeColumn(0);
-  const json = table.toJSON();
-  table.fromJSON(json);
+
+  // Data I/O (internal model)
+  const model = table.toJSON();
+  table.fromJSON(model);
+
+  // Styling APIs
+  table.setCellStyle(0, 0, { textAlign: 'center', background: '#fff3cd' });
+  table.setRowStyle(1, { fontWeight: 'bold' });
+  table.setColumnStyle(2, { width: '180px', color: '#0d6efd' });
+
+  // Access model directly (normalized)
+  console.log(table.getModel());
+  // table.setModel({ rows: 2, cols: 2, data: [["A","B"],["C","D"]] });
   // table.destroy();
-  window.ctable = table;
+  window.ctable = table; // for debugging in console
 <\/script>
 ```
 
-### API
-- constructor(container: HTMLElement, options?: { rows?: number; cols?: number })
-- addRow(): void
-- addColumn(): void
-- removeRow(index: number): void
-- removeColumn(index: number): void
-- toJSON(): { rows: number; cols: number; data: string[][] }
-- fromJSON(obj): void
-- getModel(): same as toJSON()
-- setModel(model): void (normalizes shape and string values)
-- destroy(): void (removes rendered DOM)
+### Public API
+- `new CustomTable(container, { rows?: number, cols?: number })`
+- `addRow()` / `removeRow(index)`
+- `addColumn()` / `removeColumn(index)`
+- `toJSON()` – returns the internal model (see below)
+- `toSpreadsheetJSON()` – exports a commercial.json‑like spreadsheet JSON
+- `fromJSON(obj)` – accepts internal model or spreadsheet JSON
+- `getModel()` / `setModel(model)` – normalized internal model
+- `setCellStyle(r, c, style)` / `getCellStyle(r, c)`
+- `getEffectiveCellStyle(r, c)` – computed cascade: default → column → row → cell
+- `setRowStyle(r, style)` / `getRowStyle(r)`
+- `setColumnStyle(c, style)` / `getColumnStyle(c)`
+- `destroy()`
+
+## Internal JSON model
+Used by `toJSON()`/`fromJSON()` and safe to persist.
+
+```json
+{
+  "rows": 3,
+  "cols": 3,
+  "data": [["Name","Age","City"],["Alice","30","Seattle"],["Bob","26","Austin"]],
+  "columnStyles": [ {"width":"160px"}, null, null ],
+  "rowStyles": [ null, {"fontWeight":"bold"}, null ],
+  "cellStyles": {
+    "C1R1": { "textAlign": "center", "background": "#fff3cd" }
+  }
+}
+```
+Notes
+- `cellStyles` keys are `C{col+1}R{row+1}` (0‑based indices in code; 1‑based in keys)
+- Values are inline CSS style objects (camelCase keys preferred; arbitrary CSS property names also supported via `style.setProperty`)
+
+## Spreadsheet JSON import/export
+`fromJSON` accepts a spreadsheet‑style shape, and `toSpreadsheetJSON()` exports the same shape with consolidated style keys:
+
+```jsonc
+{
+  "activeSheet": "Sheet1",
+  "sheets": [
+    {
+      "name": "Sheet1",
+      "columns": [ {"width": 160}, {"width": 120} ],
+      "rows": [
+        { "index": 0, "height": 24, "cells": [
+          { "index": 0, "value": "Name", "style": { "bold": true, "textAlign": "center" } },
+          { "index": 1, "value": "Age" }
+        ]},
+        { "index": 1, "cells": [
+          { "index": 0, "value": "Alice", "style": { "color": "#333" } },
+          { "index": 1, "value": 30 }
+        ]}
+      ],
+      "defaultCellStyle": { "fontFamily": "Segoe UI", "fontSize": 13 },
+      "mergedCells": [ "A1:B1" ],
+      "activeCell": "A1",
+      "selection": "A1:B1"
+    }
+  ],
+  "rowHeight": 22,
+  "columnWidth": 100
+}
+```
+
+What’s imported/exported
+- Values: from `value` | `text` | `displayText` | `v`
+- Grid size: inferred from `rows[].index`, `cells[].index`, `columns.length`, and A1 refs (`activeCell`, `selection`, `mergedCells`)
+- Column widths: `columns[*].width` (px); fallback to top‑level `columnWidth`
+- Row heights: `rows[*].height` (px); fallback to top‑level `rowHeight`
+- Default cell style: `defaultCellStyle` cascades to all cells (import) and is emitted from current defaults (export)
+- Per‑cell styles: inline top‑level keys or nested under `cell.style`/`cell.s` are supported on import; export writes under `cell.style`
+- Selection: activeCell/selection is imported (restores selection) and exported
+- Merged cells: imported and rendered (rowSpan/colSpan) and exported
+
+Style key mapping (examples)
+- Horizontal align: `hAlign|textAlign` → `textAlign` (export uses `textAlign`)
+- Vertical align: `vAlign|verticalAlign` → `verticalAlign` (`middle` CSS maps to `center` in export)
+- Wrapping: `wrap|wordWrap|wrapText` → `whiteSpace: 'normal'|'nowrap'`
+- Font: `fontFamily`, `fontSize` (number → `px`)
+- Colors: `color|fontColor|foreColor` → `color`; `background|bgColor|backColor|backgroundColor|fillColor` → `background` (export uses `background`)
+- Emphasis: `bold|fontWeight`, `italic|fontStyle`, `underline/strike` → `textDecoration`
+
+Notes
+- Default style is applied to each cell first (handles non‑inheritable CSS like `verticalAlign`)
+- Then column style, then row style, then cell style (overrides)
+- Applying a style to a selected row/column also writes per‑cell overrides so all cells match
+- Import accepts inline style keys at the cell object level or nested in `style`
+
+## Toolbar and selection
+- Target label shows the selection (Cell A1, Column B, Row R3)
+- Buttons: align left/center/right; bold/italic
+- Color inputs: text color, background color
+- Column‑only input: width (e.g., `120px`)
+- Apply styles to the current selection; Clear to remove styles
+
+## Development notes
+- No build tooling required; plain ES modules + CSS
+- Keep changes focused in `lib/custom-table.js` and `lib/custom-table.css`
+- When adding new spreadsheet style keys, extend the mapper in `#fromSpreadsheetJSON`
+
+## Roadmap / known limitations
+- UI to create/clear merged regions interactively
+- Additional style coverage: borders, number formats
+- No persistence baked‑in; use `toJSON()`/`fromJSON()` with your storage
+
+## License
+MIT
