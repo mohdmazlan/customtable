@@ -33,6 +33,9 @@ importInput.addEventListener('change', async (e) => {
     importInput.value = '';
   }
 });
+function exportToExcel() {
+  table.exportToExcel('table-data.xlsx');
+}
 
 // Expose globally for quick console experiments (optional)
 window.ctable = table;

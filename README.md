@@ -73,6 +73,8 @@ Include CSS, create a container, and instantiate:
 - `addColumn()` / `removeColumn(index)`
 - `toJSON()` – returns the internal model (see below)
 - `toSpreadsheetJSON()` – exports a commercial.json‑like spreadsheet JSON
+- `exportToExcel(filename?: string)` – downloads an .xlsx (requires SheetJS). Falls back to CSV if XLSX is not available.
+- `exportToCSV(filename?: string)` – downloads a CSV (values only)
 - `fromJSON(obj)` – accepts internal model or spreadsheet JSON
 - `getModel()` / `setModel(model)` – normalized internal model
 - `setCellStyle(r, c, style)` / `getCellStyle(r, c)`
@@ -140,6 +142,24 @@ What’s imported/exported
 - Per‑cell styles: inline top‑level keys or nested under `cell.style`/`cell.s` are supported on import; export writes under `cell.style`
 - Selection: activeCell/selection is imported (restores selection) and exported
 - Merged cells: imported and rendered (rowSpan/colSpan) and exported
+
+### Export to Excel (.xlsx)
+This project can export directly to .xlsx when the SheetJS library is present; otherwise it will fall back to CSV.
+
+Add SheetJS via CDN in your `index.html` before your script that calls `exportToExcel`:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+```
+
+Usage:
+
+```js
+import { CustomTable } from './lib/custom-table.js';
+const table = new CustomTable(document.getElementById('table'));
+// ... populate or import data ...
+table.exportToExcel('table.xlsx'); // uses merges, column widths, row heights
+```
 
 Style key mapping (examples)
 - Horizontal align: `hAlign|textAlign` → `textAlign` (export uses `textAlign`)
