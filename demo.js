@@ -4,7 +4,7 @@ const container = document.getElementById('tableContainer');
 const exportBtn = document.getElementById('exportBtn');
 const importInput = document.getElementById('importInput');
 
-const table = new CustomTable(container, { rows: 2, cols: 2 });
+const table = new CustomTable(container, { rows: 2, cols: 2, height: '400px', width: '600px' });
 
 exportBtn.addEventListener('click', () => {
   // Export in spreadsheet-style JSON (commercial.json-like)

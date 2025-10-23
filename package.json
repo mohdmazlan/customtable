@@ -1,8 +1,12 @@
 {
   "name": "mklctable",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A feature-rich, styleable, and framework-agnostic data table component.",
   "main": "lib/custom-table.js",
+  "files": [
+    "dist",
+    "lib"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

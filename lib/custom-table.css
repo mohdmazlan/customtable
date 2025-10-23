@@ -1,4 +1,45 @@
 /* Styles scoped under .ctable to avoid global collisions (Light theme) */
+/* fallback */
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: url(flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
+}
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Frozen first column */
+.ctTable table td:nth-child(1),
+.ctTable table th:nth-child(1) {
+    position: sticky;
+    left: 0;
+    /* Ensures the column stays on the left */
+    z-index: 5;
+}
+
+/* Sticky header */
+.ctTable table th {
+    position: sticky;
+    top: 0;
+    /* Makes the header stick to the top */
+    z-index: 2;
+    /* Keeps the header above the table body */
+}
 
 .ctable * {
     box-sizing: border-box;
@@ -23,10 +64,18 @@
 .ctable td {
     border: 1px solid #e5e7eb;
     padding: 6px 8px;
-    min-width: 90px;
     background: #ffffff;
     color: #111827;
     vertical-align: top;
+}
+.ctable td {
+    min-width: 90px;
+}
+
+.ctable td:nth-child(1),
+.ctable th{
+    font-size: 10px;
+    min-width: none !important;
 }
 
 .ctable th {
@@ -147,7 +196,7 @@
     vertical-align: middle;
 }
 
-.ctable .btn .material-icons + .btn-label {
+.ctable .btn .material-icons+.btn-label {
     margin-left: 4px;
 }
 
@@ -159,10 +208,12 @@
     cursor: pointer;
     color: inherit;
 }
+
 .ctable .icon-btn:focus {
     outline: 2px solid #93c5fd;
     outline-offset: 2px;
 }
+
 .ctable .icon-btn.active {
     outline: 1px solid #93c5fd;
     border-radius: 4px;

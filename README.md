@@ -1,6 +1,6 @@
-# Customizable Table (Developer Guide)
+# Custom Table (mklctable)
 
-Lightweight, dependency‑free, Vanilla JS table/spreadsheet component with column letters (A, B, C…), inline editing, per‑cell/row/column styling, and JSON import/export. The demo is a single static page—no build step required.
+Lightweight, dependency‑free table/spreadsheet component with column letters (A, B, C…), inline editing, per‑cell/row/column styling, merges, and export. Now distributed on npm and consumable from vanilla JS or Vue.
 
 ## Features
 - Editable grid (contenteditable TDs)
@@ -8,8 +8,8 @@ Lightweight, dependency‑free, Vanilla JS table/spreadsheet component with colu
 - Add/remove rows and columns
 - Style toolbar: text align, bold/italic, text/background color, column width
 - Per‑cell, per‑row, and per‑column inline styles with precedence: default → column → row → cell
-- Import: internal JSON format and spreadsheet‑style JSON, including inline and nested cell styles
-- Export: internal JSON format (round‑trip) and spreadsheet‑style JSON (commercial.json‑like) using consolidated keys
+- Data format: Spreadsheet‑style JSON only (commercial.json‑like); legacy internal model has been removed from the public API
+- Import/Export: spreadsheet‑style JSON with consolidated keys
 - Merged cells: import, render (rowSpan/colSpan), and export
 - Selection restore on import (activeCell/selection)
 - Applying a style to a whole row/column now updates each individual cell’s style too
@@ -18,7 +18,9 @@ Lightweight, dependency‑free, Vanilla JS table/spreadsheet component with colu
 - `index.html` – demo page
 - `demo.js` – demo wiring (load/save)
 - `lib/custom-table.js` – main ES module (CustomTable class)
+- `lib/vue-custom-table.js` – optional Vue 3 wrapper (Composition API)
 - `lib/custom-table.css` – component styles
+- `dist/custom-table.css` – re‑export of CSS for npm consumers (`import 'mklctable/dist/custom-table.css'`)
 - `styles.css` – demo styles
 - `sample-data.json` / `commercial.json` – example data
 
@@ -33,74 +35,69 @@ python -m http.server 8000
 ```
 Open http://localhost:8000 and navigate to `index.html`.
 
-## Using the component
+## Installation
 
-Include CSS, create a container, and instantiate:
+Using npm:
+
+```bash
+npm i mklctable
+```
+
+CDN (for quick demos):
 
 ```html
-<link rel="stylesheet" href="./lib/custom-table.css" />
-<div id="table"></div>
+<link rel="stylesheet" href="https://unpkg.com/mklctable/dist/custom-table.css" />
 <script type="module">
-  import { CustomTable } from './lib/custom-table.js';
-  const table = new CustomTable(document.getElementById('table'), { rows: 4, cols: 4 });
+  import { CustomTable } from 'https://unpkg.com/mklctable/lib/custom-table.js';
+  // use as shown below
+</script>
+```
 
-  // Rows/Columns
-  table.addRow();
-  table.addColumn();
-  table.removeRow(0);
-  table.removeColumn(0);
+## Usage (vanilla JS)
 
-  // Data I/O (internal model)
-  const model = table.toJSON();
-  table.fromJSON(model);
+Bundler (Vite/Webpack/etc.):
 
-  // Styling APIs
-  table.setCellStyle(0, 0, { textAlign: 'center', background: '#fff3cd' });
-  table.setRowStyle(1, { fontWeight: 'bold' });
-  table.setColumnStyle(2, { width: '180px', color: '#0d6efd' });
+```ts
+import 'mklctable/dist/custom-table.css';
+import { CustomTable } from 'mklctable/lib/custom-table.js';
 
-  // Access model directly (normalized)
-  console.log(table.getModel());
-  // table.setModel({ rows: 2, cols: 2, data: [["A","B"],["C","D"]] });
-  // table.destroy();
-  window.ctable = table; // for debugging in console
-<\/script>
+const el = document.getElementById('table');
+const table = new CustomTable(el, { rows: 4, cols: 4 });
+
+// Styling APIs
+table.setCellStyle(0, 0, { textAlign: 'center', background: '#fff3cd' });
+table.setRowStyle(1, { fontWeight: 'bold' });
+table.setColumnStyle(2, { width: '180px', color: '#0d6efd' });
+
+// Spreadsheet JSON I/O
+const sheetJson = table.getModel();         // Spreadsheet JSON
+table.setModel(sheetJson);                  // Spreadsheet JSON
+```
+
+Include Material Icons (optional, for toolbar icons):
+
+```html
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 ```
 
 ### Public API
 - `new CustomTable(container, { rows?: number, cols?: number })`
 - `addRow()` / `removeRow(index)`
 - `addColumn()` / `removeColumn(index)`
-- `toJSON()` – returns the internal model (see below)
-- `toSpreadsheetJSON()` – exports a commercial.json‑like spreadsheet JSON
-- `exportToExcel(filename?: string)` – downloads an .xlsx (requires SheetJS). Falls back to CSV if XLSX is not available.
-- `exportToCSV(filename?: string)` – downloads a CSV (values only)
-- `fromJSON(obj)` – accepts internal model or spreadsheet JSON
-- `getModel()` / `setModel(model)` – normalized internal model
+- `toJSON()` – returns Spreadsheet JSON (alias of `toSpreadsheetJSON()`)
+- `toSpreadsheetJSON()` – export Spreadsheet JSON (commercial.json‑like)
+- `exportToExcel(filename?: string)` – downloads .xlsx (requires SheetJS); falls back to CSV
+- `exportToCSV(filename?: string)` – downloads CSV (values only)
+- `fromJSON(obj)` – Spreadsheet JSON only
+- `getModel()` / `setModel(sheetJson)` – Spreadsheet JSON only
 - `setCellStyle(r, c, style)` / `getCellStyle(r, c)`
 - `getEffectiveCellStyle(r, c)` – computed cascade: default → column → row → cell
 - `setRowStyle(r, style)` / `getRowStyle(r)`
 - `setColumnStyle(c, style)` / `getColumnStyle(c)`
 - `destroy()`
 
-## Internal JSON model
-Used by `toJSON()`/`fromJSON()` and safe to persist.
-
-```json
-{
-  "rows": 3,
-  "cols": 3,
-  "data": [["Name","Age","City"],["Alice","30","Seattle"],["Bob","26","Austin"]],
-  "columnStyles": [ {"width":"160px"}, null, null ],
-  "rowStyles": [ null, {"fontWeight":"bold"}, null ],
-  "cellStyles": {
-    "C1R1": { "textAlign": "center", "background": "#fff3cd" }
-  }
-}
-```
-Notes
-- `cellStyles` keys are `C{col+1}R{row+1}` (0‑based indices in code; 1‑based in keys)
-- Values are inline CSS style objects (camelCase keys preferred; arbitrary CSS property names also supported via `style.setProperty`)
+## Data format (Spreadsheet JSON only)
+This component now reads and writes a commercial.json‑like spreadsheet shape. The legacy internal model has been removed from the public API. Use `getModel()` / `setModel()` or `toJSON()` / `fromJSON()` with the format below.
 
 ## Spreadsheet JSON import/export
 `fromJSON` accepts a spreadsheet‑style shape, and `toSpreadsheetJSON()` exports the same shape with consolidated style keys:
@@ -191,6 +188,53 @@ Notes
 - UI to create/clear merged regions interactively
 - Additional style coverage: borders, number formats
 - No persistence baked‑in; use `toJSON()`/`fromJSON()` with your storage
+
+## Vue 3 usage (optional)
+
+Import the wrapper and use it inside a Vue component. The wrapper manages the lifecycle of the underlying CustomTable instance and proxies Spreadsheet JSON.
+
+```vue
+<template>
+  <div class="sheet">
+    <CustomTableVue ref="table" :model="model" @ready="onReady" />
+  </div>
+</template>
+
+<script setup>
+import 'mklctable/dist/custom-table.css';
+import { createCustomTableComponent } from 'mklctable/lib/vue-custom-table.js';
+import { getCurrentInstance } from 'vue';
+
+const app = getCurrentInstance().appContext.app;
+const CustomTableVue = createCustomTableComponent(app.config.globalProperties.__VUE__ || {
+  // If using standard Vue 3, you can pass the imported Vue module directly instead of this shim.
+});
+
+const model = $ref(null); // Spreadsheet JSON
+function onReady(inst) {
+  // Access native methods: inst.addRow(), inst.exportToExcel(), etc.
+}
+</script>
+```
+
+Note: You can also import the wrapper directly in a setup file and `app.component('CustomTableVue', createCustomTableComponent(Vue))`.
+
+## Breaking changes
+
+As of v1.0.0:
+- Public API now uses Spreadsheet JSON only.
+- `toJSON()` returns Spreadsheet JSON; `fromJSON()` accepts Spreadsheet JSON only.
+- `getModel()`/`setModel()` operate on Spreadsheet JSON, not the old internal model.
+- CSS for npm consumers is available at `mklctable/dist/custom-table.css`.
+
+## Changelog
+
+v1.0.0
+- Vue 3 wrapper (`lib/vue-custom-table.js`)
+- Material Icons toolbar and icon‑only controls
+- Excel export includes cell styles, merges, column widths, row heights
+- Public API switched to Spreadsheet JSON only
+- CSS distributed under `dist/` for easy import
 
 ## License
 MIT
