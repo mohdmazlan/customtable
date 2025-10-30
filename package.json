@@ -1,7 +1,7 @@
 {
   "name": "mklctable",
-  "version": "1.0.2",
-  "description": "A feature-rich, styleable, and framework-agnostic data table component.",
+  "version": "1.0.3",
+  "description": "Custom table library",
   "main": "lib/custom-table.js",
   "files": [
     "dist",
