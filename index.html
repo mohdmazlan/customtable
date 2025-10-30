@@ -14,14 +14,17 @@
     <h1>Customizable Table</h1>
     <div class="controls">
       <button id="exportBtn" type="button">Export JSON</button>
+      <button id="exportToExcelBtn" type="button">Export to Excel</button>
       <label class="import-label">
         <input id="importInput" type="file" accept="application/json" hidden />
         <span class="button-like">Import JSON</span>
       </label>
+      <button id="trimRowBtn" type="button">Trim Rows</button>
+      <button id="trimColBtn" type="button">Trim Columns</button>
     </div>
     <div id="tableContainer"></div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script type="module" src="demo.js"></script>
 </body>
 
